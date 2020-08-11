@@ -1,0 +1,109 @@
+
+How to use OMPL in Coppeliasim for path and motion planning
+
+
+1. Decide of a start and goal state. When the path planning object is a serial manipulator, a goal pose(or end-effector position/orientation)is often provided instead of a goal state.
+In that case function "sim.getConfigForTipPose" can be used to find one or several goal states that satisfy the provided goal pose.
+
+-> sim.getConfigForTipPose: Searches for a manipulator configuration that matches a given end-effector position/orientation in space. Search is randomized. 
+	// 시작점과 끝점 사이에 랜덤 configuration을 찾는다 
+-> 사용법: 
+table jointPositions=sim.getConfigForTipPose(
+	number ikGroupHandle,		// pose Configurations 을 찾을 ik 그룹 핸들 
+	table jointHandles,		// pose 를 적용할 조인트 핸들
+	number distanceThreshold,	// ik 계산을 위한 거리? 크면 slow calc, 작으면 smaller subset
+	number maxTimeInMs,		// 검색이 종료된 후 최대 시간(ms)?
+	table_4 metric=nil,		// pose 간의 거리 계산에 사용되는 보정값, 보통 nil 쓰면 될듯(1, 1, 1, 0.1) 
+	table collisionPairs=nil,	// collider pair(self충돌감지)- collection 핸들, collidee pair(환경과의 충돌 감지) - 충돌계산하고자하는 collection 핸들 또는 sim.handle_all(충돌가능한 모든 물체에 대해 계산)
+	table jointOptions=nil,		// bit coded value joint dependency?
+	table lowLimits=nil,		// lowLimits와 ranges는 둘 다 nil 이거나 값이 있어야 한다.
+	table ranges=nil)		// 각 조인트별 
+
+-> 사용 예:
+	sim.getConfigForTipPose(ikGroup,jh,0.65,10,nil,collisionPairs,nil,jointLimitsL,jointRanges) 
+
+		ikGroup=sim.getIkGroupHandle('Jaco_ik')
+		jh[i]=sim.getObjectHandle('Jaco_joint'..i)
+		collisionPairs={sim.getCollectionHandle('Jaco'),sim.getCollectionHandle('Jaco'),sim.getCollectionHandle('Jaco'),sim.handle_all}	
+
+
+2. Create a path planning task with simOMPL.createTask	// OMPL Task 생성
+
+-> simOMPL.createTask
+-> 사용 예:
+	task=simOMPL.createTask('task')
+
+
+3. Select Algorithm 	// OMPL 알고리즘 선정
+
+-> 사용 예:
+	OMPLAlgo=simOMPL.Algorithm.BKPIECE1
+	simOMPL.setAlgorithm(task,OMPLAlgo)
+
+
+4. Create state space	// SS 생성
+
+-> simOMPL.createStateSpace: 
+
+-> 사용법:
+	int stateSpaceHandle=simOMPL.createStateSpace(
+	string name, 
+	int type, 
+	int objectHandle, 
+	table boundsLow, 
+	table boundsHigh, 
+	int useForProjection, 
+	float weight=1.0, 
+	int refObjectHandle=-1)
+
+-> 사용 예:
+    	for i=1,#jh,1 do
+        	local proj=i
+        	if i>3 then proj=0 end
+        	jSpaces[#jSpaces+1]=simOMPL.createStateSpace('j_space'..i,simOMPL.StateSpaceType.joint_position,jh[i],{jointLimitsL[i]},{jointLimitsH[i]},proj)
+    	end
+
+
+5. Set SS	// OMPL task 에 SS set 
+ 	
+-> 사용법: 
+	simOMPL.setStateSpace(int taskHandle, table stateSpaceHandles) 
+
+
+5.  Set Collision	// Tast에 collision 등록
+
+-> 사용법:
+	 simOMPL.setCollisionPairs(int taskHandle, table collisionPairHandles)
+
+6. set start and goal state
+
+-> 사용법:
+	simOMPL.setStartState(int taskHandle, table start_state)
+	simOMPL.setGoalState(int taskHandle, table goal_state)
+
+7. path 계산
+
+-> 사용법:
+ 	bool solved, table states=simOMPL.compute(
+	int taskHandle, 
+	float maxTime, 
+	float maxSimplificationTime=-1.0, 
+	int stateCnt=0)		//	minimum number of states to be returned
+
+	
+8. task 삭제
+
+-> 사용법:
+	 simOMPL.destroyTask(int taskHandle)
+
+
+
+Reference: 
+https://www.coppeliarobotics.com/helpFiles/index.html
+https://www.coppeliarobotics.com/helpFiles/en/omplApi.htm#destroyTask
+
+
+그 외: 
+sim.generateIkPath
+
+

@@ -1,0 +1,5 @@
+1. Get started
+https://code.visualstudio.com/docs/cpp/config-linux
+
+2. User Guide
+https://code.visualstudio.com/docs/editor/codebasics

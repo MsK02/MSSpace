@@ -1,0 +1,40 @@
+-- Velocity and acceleration on path
+nominalVel = 0.25		-- 로봇 팔의 (명목상의?) 이동 속도
+nominalAcc = 0.5		-- 로봇 팔의 (명목상의?)이동 가속도
+
+-- Get object and script handles
+target = sim.getObjectHandle("Target")		-- target 더미의 핸들
+connector = sim.getObjectHandle("Connector")	-- connector 더미의 핸들
+belt1_script = sim.getScriptHandle("ConveyorBelt")	-- 컨베이어벨트 스크립트의 핸들(사용 X?)
+
+-- Initialize variables
+pickupDummy = -1	-- Handle 저장할 변수 초기화
+releasePath = -1	
+
+function sysCall_threadmain()
+    while sim.getSimulationState()~=sim.simulation_advancing_abouttostop do		-- 시뮬레이션이 동작하는 동안
+	-- Pause script until a signal is applied on integer signal "objectAvailable"
+        sim.waitForSignal("objectAvailable")		-- ConveyorBelt 에서 설정한 signal 을 기다림.
+	-- Obtain current pickupPath-handle
+        path = sim.getObjectHandle("pickupPath")	-- pickupPath 핸들의 path 값 불러오기
+	-- Follow the pickupPath
+        sim.followPath(target,path,3,0,nominalVel,nominalAcc)		-- pickupPath 를 따라 target을 움직이는 모션
+	-- Wait one second to mimic a connection process
+        sim.wait(1)	-- 도착 후 1초 기다림
+	-- Connect the connector to pickupDummy
+        sim.setLinkDummy(connector,pickupDummy)		-- connector와 pickupDummy 링크 생성(box를 집는다)
+    	-- Set link type
+        sim.setObjectInt32Parameter(connector,sim.dummyintparam_link_type,sim.dummy_linktype_dynamics_loop_closure)	-- link-type 설정
+	-- Follow back the pickup path
+        sim.followPath(target,path,3,1,-nominalVel,-nominalAcc)		-- pickupPath를 따라 원위치(잡은 box와 함께)
+	-- Follow release path
+        sim.followPath(target,releasePath,3,0,nominalVel,nominalAcc)	-- releasePath를 따라 이동(잡은 box와 함께)
+	-- Wait 0.25 seconds 
+        sim.wait(0.25)		-- 도착 후 0.25초 기다림
+	-- Disconnect pickupDummy from connector
+        sim.setLinkDummy(connector,-1)		-- 링크 해제(물체를 놓는다)
+	-- Follow back releasePath to "idle" position
+        sim.followPath(target,releasePath,3,1,-nominalVel,-nominalAcc)		-- 다시 원위치
+    end
+end
+

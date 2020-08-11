@@ -1,0 +1,36 @@
+
+Threaded child script (Jaco)
+	1. getShiftedMatrix(matrix, localShift, dir) 
+		Usage: m=getShiftedMatrix(sim.getObjectMatrix(target1,-1),{-0.05,0,0.1},-1)
+		-> target1의 matrix를 받아서 translation 에 dir*(matrix*localShift) 을 더함.
+
+	2. findSeveralCollisionFreeConfigs(matrix,trialCnt,maxConfigs)
+		Usage: configs=findSeveralCollisionFreeConfigs(m,300,5)
+		-> shifted matrix 를 300회 돌려서 5개의 configures set 을 반환하는 함수.
+		-> sim.setObjectMatrix(ikTarget, -1, matrix) : ikTarget 더미에 matrix 초기화
+		-> cc = getConfig() 호출 : 로봇의 모든 조인트의 position을 가져옴 (6-dim radian angle)
+		-> loop (trailCnt만큼)
+			c = findCollisionFreeConfig(matrix) 호출 : jointLimts.Ranges정의 후, sim.getConfigForTipPose() 사용, 6-dim joint angle 반환(목표 지점에서의 충돌없는 위치 값인 듯)
+			dist=getConfigConfigDistance(cc,c) : cc와 c의 distance 계산
+			l 에 dist 저장, cs 에 c 저장, 새로운 dist와 l 에 있는 dist 값들의 차이가 0.001보다 작거나, cs 의 모든 c 에 대해 모든 joint position 과 새로운 c 의 모든 joint position 의 값의 차이가 0.01보다 작을 때 새로 찾은 c 는 기존의 configure와 동일하다고 판단, 새로운 c를 색출. 총 maxConfigs 갯수만큼 c를 찾아 cs에 저장 후 cs 반환
+
+
+	3. path,lengths=findShortestPath(getConfig(),configs,numberOfOMPLCalculationsPasses)
+		-> onePath,onePathLength=findPath(startConfig,goalConfigs,searchCntPerGoalConfig) 호출
+			-> OMPL Algorithm
+				1)simOMPL.createTask() 
+				2)simOMPL.setAlgorithm
+				3)loop for all joints: simOMPL.createStateSpace()
+				4)simOMPL.setStateSpace()
+				5)simOMPL.setCollisionPairs()
+				6)simOMPL.setStartState()
+				7)simOMPL.setGoalState()
+				8)loop for all GoalConfigs: simOMPL.addGoalState() 
+				9)loop for cnt: simOMPL.compute(), getPathLength() 함수 사용: path 의 총 angle값들의 차이 계산
+				10) visualizePath(path): path 시각화
+				11) simOMPL.destroyTask(task)
+
+
+	4. executeMotion(path,lengths,maxVel,maxAccel,maxJerk)
+				
+
