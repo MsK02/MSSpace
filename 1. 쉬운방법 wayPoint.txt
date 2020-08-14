@@ -1,0 +1,92 @@
+///////////////////////////////////////////KIRO///////////////////////////////////////////////////////
+		// X_desired
+		if (play_time_ <= control_start_time_ + 1)
+		{
+			if (play_time_ <= control_start_time_ + 0.5)
+			{
+				x_desired_(0) = DyrosMath::cubic(play_time_, control_start_time_, control_start_time_ + 0.5, x_init_(0), 0.58, 0, 0);
+				x_desired_(1) = DyrosMath::cubic(play_time_, control_start_time_, control_start_time_ + 0.5, x_init_(1), 0, 0, 0);
+				x_desired_(2) = 0.15;
+				// X_dot_desired
+				x_dot_desired_(0) = DyrosMath::cubicDot(play_time_, control_start_time_, control_start_time_ + 0.5, x_init_(0), 0.58, 0, 0, hz_);
+				x_dot_desired_(1) = DyrosMath::cubicDot(play_time_, control_start_time_, control_start_time_ + 0.5, x_init_(1), 0, 0, 0, hz_);
+				x_dot_desired_(2) = 0;
+			}
+			else
+			{
+				x_desired_(0) = DyrosMath::cubic(play_time_, control_start_time_ + 0.5, control_start_time_ + 1, 0.58, 0.66, 0, 0);
+				x_desired_(1) = DyrosMath::cubic(play_time_, control_start_time_ + 0.5, control_start_time_ + 1, 0, 0.18, 0, 0);
+				x_desired_(2) = 0.15;
+				// X_dot_desired
+				x_dot_desired_(0) = DyrosMath::cubicDot(play_time_, control_start_time_ + 0.5, control_start_time_ + 1, 0.58, 0.66, 0, 0, hz_);
+				x_dot_desired_(1) = DyrosMath::cubicDot(play_time_, control_start_time_ + 0.5, control_start_time_ + 1, 0, 0.18, 0, 0, hz_);
+				x_dot_desired_(2) = 0;
+			}
+		}
+		
+		if (play_time_ > control_start_time_ + 1)
+		{
+			if (play_time_ < control_start_time_ + 1.5)
+			{
+				// X_desired
+				x_desired_(0) = DyrosMath::cubic(play_time_, control_start_time_ + 1, control_start_time_ + 1.5, 0.66, 0.58, 0, 0);
+				x_desired_(1) = DyrosMath::cubic(play_time_, control_start_time_ + 1, control_start_time_ + 1.5, 0.18, 0, 0, 0);
+				x_desired_(2) = 0.15;
+				// X_dot_desired
+				x_dot_desired_(0) = DyrosMath::cubicDot(play_time_, control_start_time_ + 1, control_start_time_ + 1.5, 0.66, 0.58, 0, 0, hz_);
+				x_dot_desired_(1) = DyrosMath::cubicDot(play_time_, control_start_time_ + 1, control_start_time_ + 1.5, 0.18, 0, 0, 0, hz_);
+				x_dot_desired_(2) = 0;
+			}
+			else
+			{
+				// X_desired
+				x_desired_(0) = DyrosMath::cubic(play_time_, control_start_time_ + 1.5, control_start_time_ + 2, 0.58, 0.5, 0, 0);
+				x_desired_(1) = DyrosMath::cubic(play_time_, control_start_time_ + 1.5, control_start_time_ + 2, 0, 0.18, 0, 0);
+				x_desired_(2) = 0.15;
+				// X_dot_desired
+				x_dot_desired_(0) = DyrosMath::cubicDot(play_time_, control_start_time_ + 1.5, control_start_time_ + 2, 0.58, 0.5, 0, 0, hz_);
+				x_dot_desired_(1) = DyrosMath::cubicDot(play_time_, control_start_time_ + 1.5, control_start_time_ + 2, 0, 0.18, 0, 0, hz_);
+				x_dot_desired_(2) = 0;
+			}
+
+		}
+
+		if (play_time_ > control_start_time_ + 2)
+		{
+			if (play_time_ < control_start_time_ + 2.5)
+			{
+				// X_desired
+				x_desired_(0) = DyrosMath::cubic(play_time_, control_start_time_ + 2, control_start_time_ + 2.5, 0.5, 0.58, 0, 0);
+				x_desired_(1) = DyrosMath::cubic(play_time_, control_start_time_ + 2, control_start_time_ + 2.5, 0.18, 0, 0, 0);
+				x_desired_(2) = 0.15;
+				// X_dot_desired
+				x_dot_desired_(0) = DyrosMath::cubicDot(play_time_, control_start_time_ + 2, control_start_time_ + 2.5, 0.5, 0.58, 0, 0, hz_);
+				x_dot_desired_(1) = DyrosMath::cubicDot(play_time_, control_start_time_ + 2, control_start_time_ + 2.5, 0.18, 0, 0, 0, hz_);
+				x_dot_desired_(2) = 0;
+			}
+			else
+			{
+				// X_desired
+				x_desired_(0) = DyrosMath::cubic(play_time_, control_start_time_ + 2.5, control_start_time_ + 3, 0.58, 0.5, 0, 0);
+				x_desired_(1) = DyrosMath::cubic(play_time_, control_start_time_ + 2.5, control_start_time_ + 3, 0, -0.18, 0, 0);
+				x_desired_(2) = 0.15;
+				// X_dot_desired
+				x_dot_desired_(0) = DyrosMath::cubicDot(play_time_, control_start_time_ + 2.5, control_start_time_ + 3, 0.58, 0.5, 0, 0, hz_);
+				x_dot_desired_(1) = DyrosMath::cubicDot(play_time_, control_start_time_ + 2.5, control_start_time_ + 3, 0, -0.18, 0, 0, hz_);
+				x_dot_desired_(2) = 0;
+			}
+
+		}
+
+		if (play_time_ > control_start_time_ + 3)
+		{
+			// X_desired
+			x_desired_(0) = DyrosMath::cubic(play_time_, control_start_time_ + 3, control_start_time_ + 3.5, 0.5, 0.66, 0, 0);
+			x_desired_(1) = DyrosMath::cubic(play_time_, control_start_time_ + 3, control_start_time_ + 3.5, -0.18, -0.18, 0, 0);
+			x_desired_(2) = 0.15;
+			// X_dot_desired
+			x_dot_desired_(0) = DyrosMath::cubicDot(play_time_, control_start_time_ + 3, control_start_time_ + 3.5, 0.5, 0.66, 0, 0, hz_);
+			x_dot_desired_(1) = DyrosMath::cubicDot(play_time_, control_start_time_ + 3, control_start_time_ + 3.5, -0.18, -0.18, 0, 0, hz_);
+			x_dot_desired_(2) = 0;
+		}
+		///////////////////////////////////////////KIRO///////////////////////////////////////////////////////

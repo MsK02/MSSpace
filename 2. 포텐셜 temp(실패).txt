@@ -1,0 +1,48 @@
+	static double potential(double time,     ///< Current time
+		double time_0,   ///< Start time
+		double time_f,   ///< End time
+		double x_0,      ///< Start state x
+		double y_0,		 ///< Start state y 
+		double x_f,       ///< End state x
+		double y_f		 ///< End state y
+	)
+	{
+		double x_t, y_t;
+
+		if (time < time_0)
+		{
+			x_t = x_0;
+			y_t = y_0;
+		}
+		else if (time > time_f)
+		{
+			x_t = x_f;
+			y_t = y_f;
+		}
+		else
+		{
+			double elapsed_time = 1/100;
+			double total_x = x_f - x_0;
+			double total_y = y_f - y_0;
+			double d_g = std::sqrt(total_x * total_x + total_y * total_y);
+			
+			double ox1 = 0.645;
+			double oy1 = -0.003;
+			double do1 = std::sqrt((ox1 - x_0) * (ox1 - x_0) + (oy1 - y_0) * (oy1 - y_0)) - 0.05;
+			double ox2 = 0.575;
+			double oy2 = 0.145;
+			double do2 = std::sqrt((ox2 - x_0) * (ox2 - x_0) + (oy2 - y_0) * (oy2 - y_0)) - 0.1;
+			double ox3 = 0.51;
+			double oy3 = 0;
+			double do3 = std::sqrt((ox3 - x_0) * (ox3 - x_0) + (oy3 - y_0) * (oy3 - y_0)) - 0.07;
+
+			double dx, dy;
+			dx = 1.0 * (x_f - x_t) / d_g - 1.0 * ((ox1 - x_t) / do1 + (ox2 - x_t) / do2 + (ox2 - x_t) / do3);
+			dx = 1.0 * (y_f - y_t) / d_g - 1.0 * ((oy1 - y_t) / do1 + (oy2 - y_t) / do2 + (oy2 - y_t) / do3);
+
+			x_t = x_0 + dx * elapsed_time / std::sqrt(dx * dx + dy * dy);
+			y_t = y_0 + dy * elapsed_time / std::sqrt(dx * dx + dy * dy);
+		}
+
+		return x_t, y_t;
+	}
