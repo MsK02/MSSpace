@@ -1,0 +1,65 @@
+		///////////////////////////////////////////KIRO///////////////////////////////////////////////////////
+
+		double k1 = 0.15;
+		double k2 = 0.02;
+		//--------------------Obstacle---------------------
+		double ox1 = 0.645;
+		double oy1 = -0.003;
+		double r1 = 0.05;
+		double ox2 = 0.575;
+		double oy2 = 0.145;
+		double r2 = 0.1;
+		double ox3 = 0.51;
+		double oy3 = 0;
+		double r3 = 0.07;
+		//-----------------Normalization Variables--------------
+		double deltaX = x_desired_(0) - x_from_q_desired_6d(0);
+		double deltaY = x_desired_(1) - x_from_q_desired_6d(1);
+		double delOX1 = ox1 - x_from_q_desired_6d(0) - r1;
+		double delOY1 = oy1 - x_from_q_desired_6d(1) - r1;
+		double delOX2 = ox2 - x_from_q_desired_6d(0) - r2;
+		double delOY2 = oy2 - x_from_q_desired_6d(1) - r2;
+		double delOX3 = ox3 - x_from_q_desired_6d(0) - r3;
+		double delOY3 = oy3 - x_from_q_desired_6d(1) - r3;
+		//---------------------Target Position-----------------
+		x_desired_(0) = 0.66;
+		x_desired_(1) = 0.18;
+		x_desired_(2) = 0.15;
+		//------------------------------------------------------
+		double dist[3] = { std::sqrt(delOX1 * delOX1 + delOY1 * delOY1),
+			std::sqrt(delOX2 * delOX2 + delOY2 * delOY2),
+			std::sqrt(delOX3 * delOX3 + delOY3 * delOY3) };
+		double temp[6] = { std::min(std::sqrt(delOX1 * delOX1 + delOY1 * delOY1) / delOX1, 0.4),
+				std::min(std::sqrt(delOX2 * delOX2 + delOY2 * delOY2) / delOX2, 0.4),
+				std::min(std::sqrt(delOX3 * delOX3 + delOY3 * delOY3) / delOX3, 0.4),
+				std::min(std::sqrt(delOX1 * delOX1 + delOY1 * delOY1) / delOY1, 0.4),
+				std::min(std::sqrt(delOX2 * delOX2 + delOY2 * delOY2) / delOY2, 0.4),
+				std::min(std::sqrt(delOX3 * delOX3 + delOY3 * delOY3) / delOY3, 0.4)
+		};
+		double recurX, recurY;
+		for (int i = 0; i < 3; i++)
+		{
+			if (dist[i] < 0.03) {
+				recurX = recurX + temp[i];
+				recurY = recurY + temp[i+3];
+			}
+		}
+		x_dot_desired_(2) = 0;
+		x_dot_desired_(0) = -0.1 + k1 * (deltaX / std::sqrt(deltaX * deltaX + deltaY * deltaY))
+			- k2 * (recurX);
+		x_dot_desired_(1) = k1 * (deltaY / std::sqrt(deltaX * deltaX + deltaY * deltaY))
+			- k2 * (recurY);
+		
+
+		///////////////////////////////////////////KIRO///////////////////////////////////////////////////////
+
+		//cout << play_time_ - control_start_time_ << endl;
+		x_from_q_desired_6d << x_from_q_desired_3d(0), x_from_q_desired_3d(1), x_from_q_desired_3d(2), 0, 0, 0; // �̹� ������ ������ �����ϱ� ������ 0�̾ ��.
+
+		printf("%lf ", x_dot_desired_(0));
+		printf("%lf ", x_dot_desired_(1));
+		printf("%lf \n", x_dot_desired_(2));
+
+		j_inverse_desired_ = j_desired_.transpose() * (j_desired_ * j_desired_.transpose()).inverse();
+		q_dot_desired_ = j_inverse_desired_ * (x_dot_desired_ /*+ 1.0 * (x_desired_ - x_from_q_desired_6d)*/);
+		q_desired_ = q_desired_ + q_dot_desired_ / hz_;
